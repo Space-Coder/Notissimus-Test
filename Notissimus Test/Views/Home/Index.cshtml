@@ -1,0 +1,84 @@
+﻿@using Microsoft.AspNetCore.Http
+@using System.Net.Http
+@using System.Net
+@{
+    ViewData["Title"] = "Home Page";
+}
+@model yml_catalogShopOffer
+
+@{
+    List<yml_catalogShopOffer> modelEnum = new List<yml_catalogShopOffer>() { Model };
+}
+<div class="contatiner-fluid">
+    @foreach (var item in modelEnum)
+    {
+        <div class="text-center">
+            <p class="display-4">Offer: ID - @item.id</p>
+        </div>
+        <div class="card box-shadow">
+            <div class="row">
+                <div class="col-lg-4 d-flex justify-content-center align-items-center">
+                    @for (var i = 0; i < item.Items.Length; i++)
+                    {
+                        @if (item.ItemsElementName[i] == ItemsChoiceType.picture)
+                        {
+                            try
+                            {
+                                WebRequest request = WebRequest.Create(@item.Items[i].ToString());
+                                WebResponse response = request.GetResponse();
+                                if (!response.ContentType.StartsWith("image/"))
+                                {
+                                    <img class="img-fluid" src="https://oionline.com/wp-content/uploads/2018/03/not_found-300x225.png">
+                                }
+                                else
+                                {
+                                    <img class="img-fluid" src="@item.Items[i]" />
+                                }
+                            }
+                            catch (WebException exc)
+                            {
+                                <div class="container text-center">
+                                    <p class="lead">@exc.Message</p>
+                                </div>
+                            }
+                        }
+                    }
+                </div>
+                <div class="col-lg table-responsive">
+                    <table class="table table-bordered">
+                        <tbody>
+                            @for (var i = 0; i < item.Items.Length; i++)
+                            {
+                                @if (item.ItemsElementName[i] == ItemsChoiceType.url)
+                                {
+                                    <tr>
+                                        <th scope="row">@Html.DisplayFor(m=>m.ItemsElementName[i])</th>
+                                        <td><a href="@item.Items[i]">Link to shop</a></td>
+                                    </tr>
+                                }
+                                else if (item.ItemsElementName[i] == ItemsChoiceType.categoryId)
+                                {
+                                    var categoryID = ((yml_catalogShopOfferCategoryId)item.Items[i]).Value;
+                                    var categoryValue = (ViewBag.Category as List<yml_catalogShopCategory>).Find(m => m.id == categoryID).Value;
+                                    <tr>
+                                        <th scope="row">@Html.DisplayFor(m=>m.ItemsElementName[i])</th>
+                                        <td>@categoryValue</td>
+                                    </tr>
+                                }
+                                else if (item.ItemsElementName[i] != ItemsChoiceType.picture)
+                                {
+                                    <tr>
+                                        <th scope="row">@Html.DisplayFor(m=>m.ItemsElementName[i])</th>
+                                        <td>@item.Items[i]</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+
+</div>
